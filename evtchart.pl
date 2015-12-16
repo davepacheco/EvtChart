@@ -65,7 +65,7 @@ my $outfile = "chart.svg";
 my $fonttype = "Verdana";
 my $imagewidth = 900;		# max width, pixels
 my $eventheight = 13;		# height is dynamic
-my $dotrunc = 1;		# compress short events
+my $dotrunc = 0;		# compress short events
 
 # internals
 my $fontsize = 8;		# base text size
@@ -178,6 +178,7 @@ foreach my $time (sort { $a <=> $b } keys %Data) {
 		# unless it began before tracing.
 		$Events{$id}->{stime} = $timezero;
 	} elsif ($event eq "end") {
+		$Events{$id}->{name} = $name;
 		$Events{$id}->{etime} = $time;
 		unless (defined $Events{$id}->{stime}) {
 			$Events{$id}->{stime} = $timezero;
