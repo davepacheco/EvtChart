@@ -63,9 +63,10 @@ $| = 1;
 # tunables
 my $outfile = "chart.svg";
 my $fonttype = "Verdana";
-my $imagewidth = 900;		# max width, pixels
+my $imagewidth = 1800;		# max width, pixels
 my $eventheight = 13;		# height is dynamic
 my $dotrunc = 0;		# compress short events
+my $skip_unended = 1;		# skip input with no "end"
 
 # internals
 my $fontsize = 8;		# base text size
@@ -178,7 +179,8 @@ foreach my $time (sort { $a <=> $b } keys %Data) {
 		# unless it began before tracing.
 		$Events{$id}->{stime} = $timezero;
 	} elsif ($event eq "end") {
-		$Events{$id}->{name} = $name;
+		$Events{$id}->{name} = $name unless
+		    defined $Events{$id}->{name};
 		$Events{$id}->{etime} = $time;
 		unless (defined $Events{$id}->{stime}) {
 			$Events{$id}->{stime} = $timezero;
@@ -196,6 +198,11 @@ my $lastx = 0;
 my $toosmallpx = 4;
 my $toorecentpx = 8;
 foreach my $id (sort { $Events{$a}->{stime} <=> $Events{$b}->{stime} } keys %Events) {
+	if ($skip_unended && not defined $Events{$id}->{etime}) {
+		delete ($Events{$id});
+		next;
+	}
+
 	my $x1 = $xpadl + int($widthperns * ($Events{$id}->{stime} - $timezero));
 	my $x2 = defined $Events{$id}->{etime} ? $xpadl +
 	    int($widthperns * ($Events{$id}->{etime} - $timezero)) : $imagewidth + 10;
